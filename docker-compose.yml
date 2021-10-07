@@ -1,0 +1,59 @@
+version: '3'
+services:
+  shadow-mysql:
+    build:
+      context: docker/mysql
+    container_name: shadow_mysql
+    ports:
+      - '3307:3306'
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+  mysql:
+    build:
+      context: docker/mysql
+    container_name: globaly_business_mysql
+    ports:
+      - '3306:3306'
+    restart: always
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - database-data:/var/lib/mysql
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+  api:
+    container_name: globaly_client
+    build:
+      context: ./
+      dockerfile: docker/api/Dockerfile
+    command: sh -c "npx nx serve server"
+    volumes:
+      - './:/app'
+      - '/apps/client/'
+    ports:
+      - 5000:5000
+  client:
+    container_name: globaly_api
+    build:
+      context: ./
+      dockerfile: docker/client/Dockerfile
+    command: sh -c "npx nx serve client"
+    volumes:
+      - './:/app'
+      - '/apps/api/'
+    ports:
+      - 3000:4200
+
+volumes:
+  database-data:
