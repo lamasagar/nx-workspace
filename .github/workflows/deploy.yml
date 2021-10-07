@@ -1,7 +1,8 @@
 name: Nx Distributed Tasks
-on: push
-branches:
-  - develop
+on: 
+  push:
+    branches:
+      - develop
 
 jobs:
   test:
